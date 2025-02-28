@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Delivery Fee Calculator</title>
+    <style>
+        body {
+            display: flex;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 70%;
+            padding: 20px;
+        }
+        .pricing-table {
+            width: 30%;
+            padding: 20px;
+            border-left: 2px solid #ccc;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+    </style>
+    <script>
+        async function updateWeatherInfo() {
+            const city = document.getElementById("city").value;
+            const vehicle = document.getElementById("vehicle").value;
+
+            const response = await fetch(`/calculate_fee?city=${city}&vehicle=${vehicle}`);
+            const data = await response.json();
+
+            let weatherDiv = document.getElementById("weather-info");
+            if (data.error) {
+                weatherDiv.innerHTML = `<p style='color: red;'>Error: ${data.error}</p>`;
+            } else {
+                weatherDiv.innerHTML = `
+                    <h3>Current Weather in ${data.city}</h3>
+                    <p><strong>Weather Phenomenon:</strong> ${data.weather_phenomenon}</p>
+                    <p><strong>Weather Category:</strong> ${data.weather_category}</p>
+                    <p><strong>Temperature:</strong> ${data.air_temperature} °C</p>
+                `;
+            }
+        }
+
+        async function calculateFee() {
+            const city = document.getElementById("city").value;
+            const vehicle = document.getElementById("vehicle").value;
+
+            const response = await fetch(`/calculate_fee?city=${city}&vehicle=${vehicle}`);
+            const data = await response.json();
+
+            let resultDiv = document.getElementById("result");
+            if (data.error) {
+                resultDiv.innerHTML = `<p style='color: red;'>Error: ${data.error}</p>`;
+            } else {
+                resultDiv.innerHTML = `
+                    <h3>Delivery Fee Calculation</h3>
+                    <p><strong>City:</strong> ${data.city}</p>
+                    <p><strong>Vehicle:</strong> ${data.vehicle}</p>
+                    <p><strong>Regional Base Fee:</strong> €${data.rbf}</p>
+                    <p><strong>Air Temperature Extra Fee:</strong> €${data.atef}</p>
+                    <p><strong>Wind Speed Extra Fee:</strong> €${data.wsef}</p>
+                    <p><strong>Weather Phenomenon Extra Fee:</strong> €${data.wpef}</p>
+                    <p><strong>Total Fee:</strong> €${data.total_fee}</p>
+                    <p><strong>Timestamp:</strong> ${data.timestamp}</p>
+                `;
+            }
+        }
+    </script>
+</head>
+<body onload="updateWeatherInfo()">
+    <div class="container">
+        <h1>Food Delivery Fee Calculator</h1>
+
+        <div id="weather-info"></div>
+
+        <label for="city">Select City:</label>
+        <select id="city" onchange="updateWeatherInfo()">
+            <option value="Tallinn">Tallinn</option>
+            <option value="Tartu">Tartu</option>
+            <option value="Pärnu">Pärnu</option>
+        </select>
+
+        <label for="vehicle">Select Vehicle:</label>
+        <select id="vehicle" onchange="updateWeatherInfo()">
+            <option value="Car">Car</option>
+            <option value="Scooter">Scooter</option>
+            <option value="Bike">Bike</option>
+        </select>
+
+        <button onclick="calculateFee()">Calculate Fee</button>
+
+        <div id="result"></div>
+    </div>
+
+    <div class="pricing-table">
+        <h2>Pricing Table</h2>
+        <table>
+            <tr><th>City</th><th>Vehicle</th><th>RBF (€)</th></tr>
+            <tr><td>Tallinn</td><td>Car</td><td>4</td></tr>
+            <tr><td>Tallinn</td><td>Scooter</td><td>3.5</td></tr>
+            <tr><td>Tallinn</td><td>Bike</td><td>3</td></tr>
+            <tr><td>Tartu</td><td>Car</td><td>3.5</td></tr>
+            <tr><td>Tartu</td><td>Scooter</td><td>3</td></tr>
+            <tr><td>Tartu</td><td>Bike</td><td>2.5</td></tr>
+            <tr><td>Pärnu</td><td>Car</td><td>3</td></tr>
+            <tr><td>Pärnu</td><td>Scooter</td><td>2.5</td></tr>
+            <tr><td>Pärnu</td><td>Bike</td><td>2</td></tr>
+        </table>
+
+        <h3>Weather Condition Fees</h3>
+        <p>Air Temperature Extra Fee (ATEF) applies for Scooters & Bikes:</p>
+        <ul>
+            <li>Less than -10°C: €1</li>
+            <li>Between -10°C and 0°C: €0.5</li>
+        </ul>
+
+        <p>Wind Speed Extra Fee (WSEF) applies for Bikes:</p>
+        <ul>
+            <li>10 m/s - 20 m/s: €0.5</li>
+            <li>> 20 m/s: Usage forbidden</li>
+        </ul>
+
+        <p>Weather Phenomenon Extra Fee (WPEF) applies for Scooters & Bikes:</p>
+        <ul>
+            <li>Snow or Sleet: €1</li>
+            <li>Rain: €0.5</li>
+            <li>Glaze, Hail, Thunder: Usage forbidden</li>
+        </ul>
+    </div>
+</body>
+</html>
